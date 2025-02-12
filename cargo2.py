@@ -1,34 +1,50 @@
-import sys
-import heapq
-from collections import defaultdict
+n = int(input("How many vertices we'll add: "))
+graph = {}
+for i in range(4 + n):
+    graph[i + 1] = set()
+# Connect new vertices into a complete subgraph
+for i in range(5, 5 + n):
+    for j in range(5, 5 + n):
+        if j != i:
+            graph[i].add(j)
+            graph[j].add(i)
 
-def max_capacity_path(graph, start, end):
-    """Находит путь с максимальной пропускной способностью между start и end"""
+def connectconsts(cur):
+    # Get original vertices and their degrees
+    original = [x for x in graph if x <= 4]
+    lengths = [len(graph[x]) for x in original]
+    min_deg = min(lengths)
+    # Find original vertices with min degree excluding current
+    candidates = [x for idx, x in enumerate(original) if lengths[idx] == min_deg and x != cur]
+    if not candidates:
+        # If all others are the same or higher, pick any other original vertex
+        candidates = [x for x in original if x != cur]
+    selected = candidates[0]
+    graph[cur].add(selected)
+    graph[selected].add(cur)
 
-    # Очередь с приоритетами (max-heap), храним (-вес, вершина)
-    pq = [(-float('inf'), start)]  # Начинаем с бесконечного веса
-    max_weight = {city: 0 for city in graph}  # Максимальный вес до каждого города
-    max_weight[start] = float('inf')  # Для старта веса нет (∞)
+# Ensure each original vertex has at least 2 edges
+for i in range(1, 5):
+    while len(graph[i]) < 2:
+        # Try to connect to new vertices first
+        new_vertices = [x for x in graph if x > 4]
+        if new_vertices:
+            # Find new vertices with the smallest degree
+            degrees = [len(graph[x]) for x in new_vertices]
+            min_deg = min(degrees)
+            candidates = [x for idx, x in enumerate(new_vertices) if degrees[idx] == min_deg]
+            # Avoid connecting to the same vertex multiple times
+            for candidate in candidates:
+                if candidate not in graph[i]:
+                    graph[i].add(candidate)
+                    graph[candidate].add(i)
+                    break
+            else:
+                # All candidates already connected, fall back to connectconsts
+                connectconsts(i)
+        else:
+            # No new vertices, use connectconsts
+            connectconsts(i)
 
-    while pq:
-        curr_weight, u = heapq.heappop(pq)
-        curr_weight = -curr_weight  # Преобразуем обратно в положительный
-
-        # Если дошли до конечного города — возвращаем результат
-        if u == end:
-            return curr_weight
-
-        # Обрабатываем соседей
-        for v, weight in graph[u]:
-            # Берём минимальный вес по пути (ограничение дороги)
-            new_weight = min(curr_weight, weight)
-
-            # Если нашли больший минимальный вес по пути, обновляем
-            if new_weight > max_weight[v]:
-                max_weight[v] = new_weight
-                heapq.heappush(pq, (-new_weight, v))  # Вставляем в кучу (минус для max-heap)
-
-    return -1  # Если пути нет
-
-# Читаем входные данные
-n, m = map(int,
+for vertex in graph:
+    print(f"{vertex}: {sorted(graph[vertex])}")
