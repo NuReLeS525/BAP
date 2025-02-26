@@ -1,34 +1,35 @@
-import sys
-import heapq
-from collections import defaultdict
+def create_graph(n):
+    graph = {i: set() for i in range(1, 5 + n)}
 
-def max_capacity_path(graph, start, end):
-    """Находит путь с максимальной пропускной способностью между start и end"""
+    for i in range(1, 4):
+        graph[i].add(i + 1)
+        graph[i + 1].add(i)
+    graph[4].add(1)
+    graph[1].add(4)
 
-    # Очередь с приоритетами (max-heap), храним (-вес, вершина)
-    pq = [(-float('inf'), start)]  # Начинаем с бесконечного веса
-    max_weight = {city: 0 for city in graph}  # Максимальный вес до каждого города
-    max_weight[start] = float('inf')  # Для старта веса нет (∞)
+    # Создание полного подграфа для новых вершин (начиная с 5)
+    for i in range(5, 5 + n):
+        for j in range(5, 5 + n):
+            if i != j:
+                graph[i].add(j)
+                graph[j].add(i)
 
-    while pq:
-        curr_weight, u = heapq.heappop(pq)
-        curr_weight = -curr_weight  # Преобразуем обратно в положительный
+    # Связывание исходных 4 вершин с новыми вершинами
+    # Каждая исходная вершина должна иметь степень 2
+    # Уже есть одна связь в цикле, добавляем ещё одну связь с новой вершиной
+    for i in range(1, 5):
+        # Находим новую вершину с минимальной степенью
+        min_degree_vertex = min(range(5, 5 + n), key=lambda x: len(graph[x]))
+        graph[i].add(min_degree_vertex)
+        graph[min_degree_vertex].add(i)
 
-        # Если дошли до конечного города — возвращаем результат
-        if u == end:
-            return curr_weight
+    return graph
 
-        # Обрабатываем соседей
-        for v, weight in graph[u]:
-            # Берём минимальный вес по пути (ограничение дороги)
-            new_weight = min(curr_weight, weight)
-
-            # Если нашли больший минимальный вес по пути, обновляем
-            if new_weight > max_weight[v]:
-                max_weight[v] = new_weight
-                heapq.heappush(pq, (-new_weight, v))  # Вставляем в кучу (минус для max-heap)
-
-    return -1  # Если пути нет
-
-# Читаем входные данные
-n, m = map(int,
+# Ввод количества вершин
+n = int(input("Введите количество новых вершин: "))
+if n < 0:
+    print("Количество вершин не может быть отрицательным.")
+else:
+    graph = create_graph(n)
+    for vertex, neighbors in graph.items():
+        print(f"{vertex}: {sorted(neighbors)}")
