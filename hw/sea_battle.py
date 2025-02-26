@@ -14,7 +14,7 @@ field2 = [
     [0, 0, 0, 1, 1]
 ]
 
-def get_square(square):
+def (square):
     column = square[0]
     row = square[-1]
     return column + row
