@@ -15,7 +15,7 @@ def main():
                     i+=1
             else:
                 i+=1
- 
+
     print(m)
- 
+
 main()
