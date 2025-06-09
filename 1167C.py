@@ -29,6 +29,8 @@ def main():
     
     # Создаём DSU
     dsu = DSU(n)
+    print(dsu.parent)
+    print(dsu.size)
     
     # Обрабатываем группы
     for _ in range(m):
